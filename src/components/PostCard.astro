@@ -2,6 +2,8 @@
 const { post, index = 0 } = Astro.props;
 const { title, description, date, tags, emoji, cover, category } = post.data;
 const slug = post.slug;
+const base = import.meta.env.BASE_URL; // GH Pages /blog/，本地 /
+const asset = (p: string) => base + p.replace(/^\//, "");
 const fmtDate = new Date(date).toLocaleDateString("zh-CN", {
   year: "numeric",
   month: "long",
@@ -12,7 +14,7 @@ const tagClass = ["", "violet", "cyan"];
 ---
 <a
   class="card post-card"
-  href={`/posts/${slug}`}
+  href={`${base}posts/${slug}`}
   data-slug={slug}
   data-category={category.toLowerCase()}
   data-title={title.toLowerCase()}
@@ -20,7 +22,7 @@ const tagClass = ["", "violet", "cyan"];
   data-tags={tags.join(" ").toLowerCase()}
 >
   <div class={`cover ${alt ? "alt" : ""}`}>
-    {cover ? <img src={cover} alt={title} /> : <span>{emoji}</span>}
+    {cover ? <img src={asset(cover)} alt={title} /> : <span>{emoji}</span>}
   </div>
   <div class="body">
     <div class="meta"><span>📅 {fmtDate}</span></div>

@@ -78,11 +78,14 @@ const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
     let pfReady = false;
 
     // 尝试加载 Pagefind（仅构建产物中存在；dev 下失败则降级）
+    // 用 import.meta.env.BASE_URL 拼接，兼容 GitHub Pages 子路径(/blog/)部署
     (async () => {
       try {
-        const pfUrl = "/pagefind/pagefind.js";
+        const pfUrl = `${import.meta.env.BASE_URL}pagefind/pagefind.js`;
         pf = await import(/* @vite-ignore */ pfUrl);
-        if (pf && typeof pf.init === "function") await pf.init();
+        if (pf && typeof pf.init === "function") {
+          await pf.init({ basePath: `${import.meta.env.BASE_URL}pagefind/` });
+        }
         pfReady = true;
       } catch {
         pfReady = false;

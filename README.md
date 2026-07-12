@@ -85,6 +85,7 @@ npm run preview  # 预览构建结果
 | **Netlify** | `netlify.toml` | `npm run build` | `dist` |
 | **Vercel** | `vercel.json` | `npm run build` | `dist` |
 | **Cloudflare Pages** | 无需文件 | `npm run build` | `dist` |
+| **GitHub Pages** | `.github/workflows/deploy.yml` | `npm run build` | `dist`（经 Pages Artifact） |
 
 ### 方式 A：Netlify（默认，已附 `netlify.toml`）
 1. 登录 Netlify → “Add new site” → 关联 GitHub 仓库 `blog`。
@@ -97,12 +98,24 @@ npm run preview  # 预览构建结果
 ### 方式 C：Vercel
 关联仓库 `blog`，框架预设选 Astro（构建 `npm run build`、输出 `dist`，已写在 `vercel.json`，自动识别）。
 
+### 方式 D：GitHub Pages（无需第三方账号，仓库自带工作流）
+访问地址：`https://id189.github.io/blog/`（项目站点，路径前缀 `/blog/`）。
+
+1. 仓库已内置 `.github/workflows/deploy.yml`：推送 `main` 即自动构建并发布到 GitHub Pages。
+2. 首次需手动开启一次：仓库 **Settings → Pages → Build and deployment → Source 选 “GitHub Actions”**。
+3. 之后每次 `git push` 到 `main` 自动部署；在仓库 **Actions** 标签页可看进度，部署完成后站点即更新。
+4. 工作流通过环境变量 `ASTRO_BASE=/blog/`、`ASTRO_SITE=https://id189.github.io` 注入子路径，
+   站内链接、资源、Pagefind 搜索索引均自动适配该路径。
+
+> 想改 GitHub 用户名或仓库名时，把工作流里的 `ASTRO_SITE` 与 `ASTRO_BASE` 同步改成对应值即可。
+
 ### 设置站点域名（可选）
 仓库已在 `astro.config.mjs` 预留 `site` 字段（占位 `https://example.netlify.app`）。
 连接平台后，在平台的**环境变量**里设置 `ASTRO_SITE` 为你的真实域名（如 `https://blog.example.com`），
-构建时会自动覆盖，用于生成规范链接与 sitemap。
+构建时会自动覆盖，用于生成规范链接与 sitemap。GitHub Pages 方式已在工作流中固定 `ASTRO_SITE`/`ASTRO_BASE`，
+无需在平台侧额外设置。
 
-> 所有方式都不需要任何 Token；构建发布方只是从 GitHub Pages 换成了第三方托管，
+> 所有方式都不需要任何 Token；内容同步始终基于 GitHub 仓库 `blog`。
 > 内容同步仍基于 GitHub 仓库。
 
 ## 🎨 改文案 / 配色

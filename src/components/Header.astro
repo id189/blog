@@ -1,10 +1,13 @@
 ---
 import { SITE, NAV } from "../consts";
+const base = import.meta.env.BASE_URL; // GH Pages /blog/，本地 /
 const path = Astro.url.pathname;
+const normPath = (path.startsWith(base) ? path.slice(base.length - 1) : path) || "/";
+const fullHref = (h: string) => base + h.replace(/^\//, "");
 ---
 <header class="site-header" id="siteHeader">
   <div class="container inner">
-    <a class="brand" href="/">
+    <a class="brand" href={base}>
       <span class="logo">◆</span>
       <span>{SITE.title}</span>
     </a>
@@ -13,7 +16,7 @@ const path = Astro.url.pathname;
     </button>
     <nav class="nav">
       {NAV.map((item) => (
-        <a href={item.href} class={path === item.href ? "active" : ""}>{item.label}</a>
+        <a href={fullHref(item.href)} class={normPath === item.href ? "active" : ""}>{item.label}</a>
       ))}
     </nav>
   </div>
