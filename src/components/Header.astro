@@ -1,0 +1,49 @@
+---
+import { SITE, NAV } from "../consts";
+const path = Astro.url.pathname;
+---
+<header class="site-header" id="siteHeader">
+  <div class="container inner">
+    <a class="brand" href="/">
+      <span class="logo">◆</span>
+      <span>{SITE.title}</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="打开菜单">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav">
+      {NAV.map((item) => (
+        <a href={item.href} class={path === item.href ? "active" : ""}>{item.label}</a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+  }
+  .nav-toggle span {
+    width: 22px;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    display: block;
+    transition: transform 0.2s;
+  }
+  @media (max-width: 720px) {
+    .nav-toggle { display: inline-flex; }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById("navToggle");
+  const header = document.getElementById("siteHeader");
+  btn?.addEventListener("click", () => header?.classList.toggle("nav-open"));
+</script>

@@ -1,0 +1,32 @@
+---
+import Base from "../layouts/Base.astro";
+import { SITE } from "../consts";
+---
+<Base title="关于">
+  <section class="about-hero">
+    <div class="container">
+      <div class="avatar">🤖</div>
+      <h1 class="gradient-text">{SITE.author}</h1>
+      <p class="muted">{SITE.tagline}</p>
+    </div>
+  </section>
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="card about-card">
+        <h2>关于这个博客</h2>
+        <p>
+          这里记录我在 AI 与前端技术上的探索、踩坑与笔记。文章用 Markdown 写成，
+          推送到 GitHub 后会自动构建并发布，无需手动上传。
+        </p>
+        <p>
+          如果你对内容有任何想法，或者想交流技术，欢迎通过下方渠道联系我。
+        </p>
+        <div class="socials">
+          <a class="btn btn-primary" href={SITE.social.github} target="_blank" rel="noopener">GitHub</a>
+          <a class="btn btn-ghost" href={SITE.social.twitter} target="_blank" rel="noopener">Twitter</a>
+          <a class="btn btn-ghost" href={`mailto:${SITE.email}`}>Email</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
