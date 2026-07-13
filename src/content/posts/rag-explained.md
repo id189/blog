@@ -3,7 +3,7 @@ title: "大模型应用入门：从 API 到 RAG"
 description: "搞懂大模型应用的三层结构—— Prompt、函数调用、检索增强生成（RAG）。"
 date: 2026-07-10
 tags: ["大模型", "RAG", "AI"]
-category: "AI 应用"
+category: "AI应用"
 emoji: "🧠"
 author: "你的名字"
 draft: false

@@ -3,7 +3,7 @@ title: "安全渗透想关技术名词 · 2026年7月12日"
 description: "行业网络安全防护和安全渗透想关技术名词、行业专业术语等内容。"
 date: 2026-07-12
 tags: ["CTF", "网络安全", "安全渗透"]
-category: "CTF 安全渗透"
+category: "CTF安全渗透"
 emoji: "🤖"
 cover: "/covers/20260624104345_986702-520x292.webp"
 author: "伟哥"

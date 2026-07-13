@@ -3,7 +3,7 @@ title: "前端也能玩转 AI：浏览器里的本地推理"
 description: "不用服务器，用 WebGPU 和 Transformers.js 在浏览器里直接跑大模型。"
 date: 2026-07-08
 tags: ["前端", "WebGPU", "AI"]
-category: "前端 AI"
+category: "前端AI"
 emoji: "⚡"
 author: "你的名字"
 draft: false
