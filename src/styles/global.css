@@ -374,9 +374,10 @@ img { max-width: 100%; display: block; }
   place-items: center;
   font-size: 3rem;
   position: relative;
+  overflow: hidden; /* 裁掉溢出封面盒子的图片，绝不会盖住下方 .body 的日期/标题 */
 }
 .post-card .cover.alt { background: var(--grad-accent); }
-.post-card .cover img { width: 100%; height: 100%; object-fit: cover; }
+.post-card .cover img { width: 100%; height: 100%; object-fit: cover; display: block; max-height: 100%; }
 .post-card .body {
   padding: 20px 22px 24px;
   display: flex;

@@ -19,11 +19,15 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
 <script>
   const links = Array.from(document.querySelectorAll("#tocList a"));
-  const map = new Map();
-  links.forEach((l) => {
-    const el = document.getElementById((l as HTMLAnchorElement).dataset.slug || "");
-    if (el) map.set(l, el);
+  const heads = Array.from(document.querySelectorAll(".prose h2, .prose h3"));
+  // links 与 heads 均为 depth 2/3、文档顺序一致，直接按下标配对，
+  // 彻底规避 getHeadings().slug 与渲染 id 在大小写/编码上错位（中文不受 slugger 改写故碰巧正常，拉丁字符会被改写而失效）。
+  const pairs = links.slice(0, heads.length).map((l, i) => ({ l, el: heads[i] }));
+  // 用真实渲染出的 id 修正锚点，保证点击一定能跳转
+  pairs.forEach(({ l, el }) => {
+    if (el && el.id) l.setAttribute("href", "#" + el.id);
   });
+  const map = new Map(pairs.map((p) => [p.l, p.el]));
   if (map.size > 0) {
     const obs = new IntersectionObserver(
       (entries) => {
@@ -37,6 +41,6 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
       },
       { rootMargin: "0px 0px -70% 0px" }
     );
-    map.forEach((el) => obs.observe(el));
+    map.forEach((el) => el && obs.observe(el));
   }
 </script>

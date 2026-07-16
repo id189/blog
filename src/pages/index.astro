@@ -79,7 +79,13 @@ const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
 
     // 尝试加载 Pagefind（仅构建产物中存在；dev 下失败则降级）
     // 用 import.meta.env.BASE_URL 拼接，兼容 GitHub Pages 子路径(/blog/)部署
+    // dev 模式(astro dev)不会生成 dist/pagefind 索引，直接跳过加载以避免 404，
+    // 此时搜索自动降级为基于 data-* 属性的纯文本匹配。
     (async () => {
+      if (!import.meta.env.PROD) {
+        pfReady = false;
+        return;
+      }
       try {
         const pfUrl = `${import.meta.env.BASE_URL}pagefind/pagefind.js`;
         pf = await import(/* @vite-ignore */ pfUrl);
