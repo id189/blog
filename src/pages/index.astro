@@ -48,7 +48,7 @@ const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
             <button type="button" class="cat-item active" data-cat="">全部 <span class="count">{posts.length}</span></button>
             {
               categories.map(([c, n]) => (
-                <button type="button" class="cat-item" data-cat={c}>
+                <button type="button" class="cat-item" data-cat={c.toLowerCase()}>
                   {c} <span class="count">{n}</span>
                 </button>
               ))
