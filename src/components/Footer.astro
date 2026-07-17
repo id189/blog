@@ -4,10 +4,10 @@ const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="container inner">
-    <span>© {year} {SITE.title} · {SITE.tagline}</span>
+    <span>© {year} <span data-i18n="site.title">{SITE.title}</span> · <span data-i18n="site.tagline">{SITE.tagline}</span></span>
     <span>
       Powered by <a href="https://astro.build" target="_blank" rel="noopener">Astro</a>
-      · 浅色霓虹科技风
+      · <span data-i18n="footer.style">浅色霓虹科技风</span>
     </span>
   </div>
 </footer>

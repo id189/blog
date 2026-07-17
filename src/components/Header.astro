@@ -1,45 +1,55 @@
 ---
 import { SITE, NAV } from "../consts";
+import { LANGS, DEFAULT_LANG } from "../i18n/ui";
 const base = import.meta.env.BASE_URL; // GH Pages /blog/，本地 /
 const path = Astro.url.pathname;
 const normPath = (path.startsWith(base) ? path.slice(base.length - 1) : path) || "/";
 const fullHref = (h: string) => base + h.replace(/^\//, "");
+const curLang = LANGS.find((l) => l.code === DEFAULT_LANG)!;
 ---
 <header class="site-header" id="siteHeader">
   <div class="container inner">
     <a class="brand" href={base}>
       <span class="logo">◆</span>
-      <span>{SITE.title}</span>
+      <span data-i18n="site.title">{SITE.title}</span>
     </a>
-    <button class="nav-toggle" id="navToggle" aria-label="打开菜单">
+    <button class="nav-toggle" id="navToggle" data-i18n-attr="aria-label:nav.menu" aria-label="打开菜单">
       <span></span><span></span><span></span>
     </button>
-    <nav class="nav">
-      {NAV.map((item) => (
-        <a href={fullHref(item.href)} class={normPath === item.href ? "active" : ""}>{item.label}</a>
-      ))}
-    </nav>
+    <div class="nav-right">
+      <nav class="nav">
+        {NAV.map((item) => (
+          <a href={fullHref(item.href)} class={normPath === item.href ? "active" : ""} data-i18n={item.key}>{item.label}</a>
+        ))}
+      </nav>
+      <div class="nav-controls">
+        <div class="lang-switch">
+          <button type="button" class="ctrl-btn lang-btn" id="langBtn" data-i18n-attr="aria-label:lang.aria" aria-label="切换语言">
+            <span class="lang-cur">{curLang.flag} {curLang.label}</span>
+            <span class="caret">▾</span>
+          </button>
+          <div class="lang-menu" id="langMenu">
+            {LANGS.map((l) => (
+              <button type="button" class="lang-opt" data-lang={l.code}>
+                <span class="flag">{l.flag}</span><span class="nm">{l.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div class="theme-switch" role="group" data-i18n-attr="aria-label:theme.aria" aria-label="切换主题">
+          <button type="button" class="theme-btn" data-theme="neon" data-i18n-attr="title:theme.neon" title="霓光科技">◆</button>
+          <button type="button" class="theme-btn" data-theme="cute" data-i18n-attr="title:theme.cute" title="可爱">🌸</button>
+          <button type="button" class="theme-btn" data-theme="pretty" data-i18n-attr="title:theme.pretty" title="漂亮">💐</button>
+          <button type="button" class="theme-btn" data-theme="cool" data-i18n-attr="title:theme.cool" title="炫酷">🌌</button>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
 <style>
-  .nav-toggle {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-  }
-  .nav-toggle span {
-    width: 22px;
-    height: 2px;
-    background: var(--ink);
-    border-radius: 2px;
-    display: block;
-    transition: transform 0.2s;
-  }
+  .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
+  .nav-toggle span { width: 22px; height: 2px; background: var(--ink); border-radius: 2px; display: block; transition: transform 0.2s; }
   @media (max-width: 720px) {
     .nav-toggle { display: inline-flex; }
   }

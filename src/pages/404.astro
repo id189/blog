@@ -2,14 +2,14 @@
 import Base from "../layouts/Base.astro";
 const base = import.meta.env.BASE_URL; // GH Pages /blog/，本地 /
 ---
-<Base title="页面未找到">
+<Base title="页面未找到" titleKey="404.title">
   <section class="about-hero">
     <div class="container">
       <div class="avatar">🔍</div>
       <h1 class="gradient-text">404</h1>
-      <p class="muted">没有找到这个页面，它可能已被移动或删除。</p>
+      <p class="muted" data-i18n="404.msg">没有找到这个页面，它可能已被移动或删除。</p>
       <div class="socials">
-        <a class="btn btn-primary" href={base}>回到首页</a>
+        <a class="btn btn-primary" href={base} data-i18n="404.btn">回到首页</a>
       </div>
     </div>
   </section>

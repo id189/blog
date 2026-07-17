@@ -5,7 +5,7 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
 {
   items.length > 0 && (
     <div class="card toc-card">
-      <h4>目录</h4>
+      <h4 data-i18n="toc.title">目录</h4>
       <ul id="tocList">
         {items.map((h) => (
           <li style={h.depth === 3 ? "padding-left:12px" : ""}>

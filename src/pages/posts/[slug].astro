@@ -21,6 +21,7 @@ const fmtDate = new Date(date).toLocaleDateString("zh-CN", {
   month: "long",
   day: "numeric",
 });
+const iso = new Date(date).toISOString();
 ---
 <Base title={title} description={description}>
   <article class="section">
@@ -28,7 +29,7 @@ const fmtDate = new Date(date).toLocaleDateString("zh-CN", {
       <div>
         <div class="article-head">
           <div class="article-meta">
-            <span>📅 {fmtDate}</span>
+            <span>📅 <time data-iso={iso}>{fmtDate}</time></span>
             <span>✍️ {author}</span>
             {tags.map((t) => <span class="tag">{t}</span>)}
           </div>
@@ -47,7 +48,7 @@ const fmtDate = new Date(date).toLocaleDateString("zh-CN", {
           <Content />
         </div>
         <div style="margin-top:40px">
-          <a class="btn btn-ghost" href={base}>← 返回首页</a>
+          <a class="btn btn-ghost" href={base} data-i18n="post.back">← 返回首页</a>
         </div>
       </div>
       <aside class="toc">

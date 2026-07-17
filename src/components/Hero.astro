@@ -4,12 +4,15 @@ const base = import.meta.env.BASE_URL; // GH Pages /blog/，本地 /
 ---
 <section class="hero">
   <div class="container">
-    <span class="eyebrow">✦ AI · 技术 · 笔记</span>
-    <h1>{SITE.title} <span class="gradient-text">· {SITE.tagline}</span></h1>
-    <p class="lead">{SITE.description}</p>
+    <span class="eyebrow" data-i18n="hero.eyebrow">✦ AI · 技术 · 笔记</span>
+    <h1>
+      <span data-i18n="site.title">{SITE.title}</span>
+      <span class="gradient-text">· <span data-i18n="site.tagline">{SITE.tagline}</span></span>
+    </h1>
+    <p class="lead" data-i18n="site.description">{SITE.description}</p>
     <div class="cta">
-      <a class="btn btn-primary" href="#posts">浏览文章 →</a>
-      <a class="btn btn-ghost" href={`${base}about`}>关于我</a>
+      <a class="btn btn-primary" href="#posts" data-i18n="hero.cta1">浏览文章 →</a>
+      <a class="btn btn-ghost" href={`${base}about`} data-i18n="hero.cta2">关于我</a>
     </div>
   </div>
 </section>

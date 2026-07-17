@@ -9,6 +9,7 @@ const fmtDate = new Date(date).toLocaleDateString("zh-CN", {
   month: "long",
   day: "numeric",
 });
+const iso = new Date(date).toISOString();
 const alt = index % 2 === 1;
 const tagClass = ["", "violet", "cyan"];
 ---
@@ -25,7 +26,7 @@ const tagClass = ["", "violet", "cyan"];
     {cover ? <img src={asset(cover)} alt={title} /> : <span>{emoji}</span>}
   </div>
   <div class="body">
-    <div class="meta"><span>📅 {fmtDate}</span></div>
+    <div class="meta"><span>📅 <time data-iso={iso}>{fmtDate}</time></span></div>
     <h3>{title}</h3>
     <p class="excerpt">{description}</p>
     <div class="tags">

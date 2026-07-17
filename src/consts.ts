@@ -14,6 +14,6 @@ export const SITE = {
 };
 
 export const NAV = [
-  { label: "首页", href: "/" },
-  { label: "关于", href: "/about" },
+  { label: "首页", href: "/", key: "nav.home" },
+  { label: "关于", href: "/about", key: "nav.about" },
 ];

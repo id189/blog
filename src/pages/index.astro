@@ -25,8 +25,8 @@ const topTags = [...tagFreq.entries()]
   <section class="section" id="posts">
     <div class="container home-container">
       <div class="section-head">
-        <h2>最新文章</h2>
-        <span class="muted" id="resultCount">{posts.length} 篇 · 持续更新中</span>
+        <h2 data-i18n="index.latest">最新文章</h2>
+        <span class="muted" id="resultCount" data-i18n="index.count" data-count={posts.length}>{posts.length} 篇 · 持续更新中</span>
       </div>
 
       <div class="home-layout">
@@ -43,23 +43,24 @@ const topTags = [...tagFreq.entries()]
               placeholder="搜索文章…"
               autocomplete="off"
               aria-label="站内搜索"
+              data-i18n-attr="placeholder:index.searchPh|aria-label:index.searchAria"
             />
           </div>
 
           <div class="card cat-list">
-            <h4>分类</h4>
-            <button type="button" class="cat-item active" id="catAll" data-cat-path=""><span class="name">全部</span><span class="count">{posts.length}</span></button>
+            <h4 data-i18n="index.category">分类</h4>
+            <button type="button" class="cat-item active" id="catAll" data-cat-path=""><span class="name" data-i18n="index.all">全部</span><span class="count">{posts.length}</span></button>
             <div class="cat-tree" id="catTree"></div>
           </div>
 
           <div class="card tag-cloud-card">
-            <h4>标签</h4>
+            <h4 data-i18n="index.tag">标签</h4>
             <div class="tag-cloud" id="tagCloud"></div>
           </div>
         </aside>
       </div>
 
-      <p class="no-result" id="noResult" hidden>没有匹配的文章，换个关键词试试～</p>
+      <p class="no-result" id="noResult" data-i18n="index.noResult" hidden>没有匹配的文章，换个关键词试试～</p>
     </div>
   </section>
 </Base>
@@ -120,7 +121,8 @@ const topTags = [...tagFreq.entries()]
         card.style.display = show ? "" : "none";
         if (show) visible++;
       }
-      resultCount.textContent = `${visible} 篇 · 持续更新中`;
+      resultCount.dataset.count = String(visible);
+      resultCount.textContent = window.__fmtCount ? window.__fmtCount(visible) : (visible + " 篇 · 持续更新中");
       noResult.hidden = visible !== 0;
     }
 
