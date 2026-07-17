@@ -765,6 +765,7 @@ img { max-width: 100%; display: block; }
   .nav a { padding: 12px 14px; }
   .nav-controls { justify-content: space-between; }
   .lang-menu { position: static; box-shadow: none; border-color: var(--line); }
+  .theme-menu { position: static; box-shadow: none; border-color: var(--line); }
 }
 
 /* =========================================================
