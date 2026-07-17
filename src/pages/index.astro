@@ -32,6 +32,9 @@ const topTags = [...tagFreq.entries()]
       <div class="home-layout">
         <div class="posts-grid">
           {posts.map((post, i) => <PostCard post={post} index={i} />)}
+          <div id="loadSentinel" class="load-sentinel" aria-hidden="true">
+            <button id="loadMoreBtn" class="more-btn" type="button" hidden data-i18n="index.more">查看更多文章 →</button>
+          </div>
         </div>
 
         <aside class="side-col">
@@ -105,25 +108,76 @@ const topTags = [...tagFreq.entries()]
     const normUrl = (u) => u.replace(/\/index\.html$/, "").replace(/\/+$/, "");
 
     // 三条件 AND：选中分类子树 ∩ 选中标签 ∩ 搜索命中
+    function cardMatches(card) {
+      const postCat = card.dataset.category ?? "";
+      const slug = card.dataset.slug ?? "";
+      const cardTags = new Set((card.dataset.tags ?? "").split(" ").filter(Boolean));
+      const catOk =
+        activeCatPath === null ||
+        postCat === activeCatPath ||
+        postCat.startsWith(activeCatPath + "/");
+      const tagsOk = selectedTags.size === 0 || [...selectedTags].every((t) => cardTags.has(t));
+      const searchOk = matchedSlugs === null || matchedSlugs.has(slug);
+      return catOk && tagsOk && searchOk;
+    }
+
+    // 懒加载：默认显示前 PAGE 个；滚动到底自动再加载 PAGE 个（最多到 MAX_AUTO）；超过后显示“更多”按钮（手动加载，不自动）
+    const PAGE = 12;
+    const MAX_AUTO = 24;
+    let batch = PAGE;
+    let observer = null;
+    const loadSentinel = document.getElementById("loadSentinel");
+    const moreBtn = document.getElementById("loadMoreBtn");
+
     function applyFilter() {
       let visible = 0;
+      let shown = 0;
       for (const card of cards) {
-        const postCat = card.dataset.category ?? "";
-        const slug = card.dataset.slug ?? "";
-        const cardTags = new Set((card.dataset.tags ?? "").split(" ").filter(Boolean));
-        const catOk =
-          activeCatPath === null ||
-          postCat === activeCatPath ||
-          postCat.startsWith(activeCatPath + "/");
-        const tagsOk = selectedTags.size === 0 || [...selectedTags].every((t) => cardTags.has(t));
-        const searchOk = matchedSlugs === null || matchedSlugs.has(slug);
-        const show = catOk && tagsOk && searchOk;
-        card.style.display = show ? "" : "none";
-        if (show) visible++;
+        if (!cardMatches(card)) { card.style.display = "none"; continue; }
+        visible++;
+        const showThis = shown < batch;
+        card.style.display = showThis ? "" : "none";
+        if (showThis) shown++;
       }
       resultCount.dataset.count = String(visible);
       resultCount.textContent = window.__fmtCount ? window.__fmtCount(visible) : (visible + " 篇 · 持续更新中");
       noResult.hidden = visible !== 0;
+      updateLoadUI(visible);
+    }
+
+    function updateLoadUI(matchingCount) {
+      if (!moreBtn || !loadSentinel) return;
+      if (batch < matchingCount && batch < MAX_AUTO) {
+        moreBtn.hidden = true;
+        startObserver();
+      } else if (batch >= MAX_AUTO && batch < matchingCount) {
+        moreBtn.hidden = false;
+        stopObserver();
+      } else {
+        moreBtn.hidden = true;
+        stopObserver();
+      }
+    }
+
+    function loadMore() {
+      const matchingCount = cards.filter(cardMatches).length;
+      if (batch < matchingCount && batch < MAX_AUTO) {
+        batch = Math.min(batch + PAGE, matchingCount, MAX_AUTO);
+        applyFilter();
+      } else {
+        stopObserver();
+      }
+    }
+
+    function startObserver() {
+      if (observer || !loadSentinel) return;
+      observer = new IntersectionObserver((entries) => {
+        for (const e of entries) if (e.isIntersecting) loadMore();
+      }, { rootMargin: "200px 0px" });
+      observer.observe(loadSentinel);
+    }
+    function stopObserver() {
+      if (observer) { observer.disconnect(); observer = null; }
     }
 
     // ── 分类树（懒加载：初次仅请求顶级，展开时再 fetch 子级）──
@@ -150,13 +204,14 @@ const topTags = [...tagFreq.entries()]
       label.className = "cat-label";
       label.dataset.catPath = child.path;
       label.innerHTML = `<span class="name">${child.name}</span><span class="count">${child.postCount}</span>`;
-      label.addEventListener("click", () => {
-        document.querySelectorAll(".cat-label.selected").forEach((el) => el.classList.remove("selected"));
-        label.classList.add("selected");
-        catAllBtn?.classList.remove("active");
-        activeCatPath = child.path === "" ? null : child.path;
-        applyFilter();
-      });
+        label.addEventListener("click", () => {
+          document.querySelectorAll(".cat-label.selected").forEach((el) => el.classList.remove("selected"));
+          label.classList.add("selected");
+          catAllBtn?.classList.remove("active");
+          activeCatPath = child.path === "" ? null : child.path;
+          batch = PAGE;
+          applyFilter();
+        });
 
       if (child.hasChildren) {
         let expanded = false;
@@ -199,6 +254,7 @@ const topTags = [...tagFreq.entries()]
       activeCatPath = null;
       document.querySelectorAll(".cat-label.selected").forEach((el) => el.classList.remove("selected"));
       catAllBtn.classList.add("active");
+      batch = PAGE;
       applyFilter();
     });
 
@@ -221,6 +277,7 @@ const topTags = [...tagFreq.entries()]
             selectedTags.add(key);
             btn.classList.add("active");
           }
+          batch = PAGE;
           applyFilter();
         });
         tagCloud.appendChild(btn);
@@ -230,6 +287,7 @@ const topTags = [...tagFreq.entries()]
     // ── 搜索（防抖）──
     let timer;
     searchInput.addEventListener("input", () => {
+      batch = PAGE;
       const term = searchInput.value.trim().toLowerCase();
       window.clearTimeout(timer);
       timer = window.setTimeout(async () => {
@@ -267,5 +325,12 @@ const topTags = [...tagFreq.entries()]
         applyFilter();
       }, 200);
     });
+
+    // 初始仅显示前 12 篇；点击“更多”按钮加载剩余匹配项（不自动）
+    moreBtn?.addEventListener("click", () => {
+      batch = cards.filter(cardMatches).length;
+      applyFilter();
+    });
+    applyFilter();
   }
 </script>

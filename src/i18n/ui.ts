@@ -22,6 +22,7 @@ const zh = {
   "site.description": "一个分享 AI 技术、工具实测与学习笔记的个人博客，用最轻盈的方式聊最硬核的科技。",
   "nav.home": "首页",
   "nav.about": "关于",
+  "nav.github": "GitHub 仓库",
   "nav.menu": "打开菜单",
   "hero.eyebrow": "✦ AI · 技术 · 笔记",
   "hero.cta1": "浏览文章 →",
@@ -34,6 +35,7 @@ const zh = {
   "index.all": "全部",
   "index.tag": "标签",
   "index.noResult": "没有匹配的文章，换个关键词试试～",
+  "index.more": "查看更多文章 →",
   "toc.title": "目录",
   "post.back": "← 返回首页",
   "about.h2": "关于这个博客",
@@ -49,6 +51,7 @@ const zh = {
   "theme.cute": "可爱",
   "theme.pretty": "漂亮",
   "theme.cool": "炫酷",
+  "theme.random": "随机",
 };
 
 const en: Record<string, string> = {
@@ -58,6 +61,7 @@ const en: Record<string, string> = {
   "site.description": "A personal blog sharing AI tech, tool reviews and learning notes — hardcore tech, the lightweight way.",
   "nav.home": "Home",
   "nav.about": "About",
+  "nav.github": "GitHub repo",
   "nav.menu": "Open menu",
   "hero.eyebrow": "✦ AI · Tech · Notes",
   "hero.cta1": "Browse posts →",
@@ -70,6 +74,7 @@ const en: Record<string, string> = {
   "index.all": "All",
   "index.tag": "Tags",
   "index.noResult": "No matching posts, try another keyword~",
+  "index.more": "View more posts →",
   "toc.title": "Contents",
   "post.back": "← Back home",
   "about.h2": "About this blog",
@@ -85,6 +90,7 @@ const en: Record<string, string> = {
   "theme.cute": "Cute",
   "theme.pretty": "Pretty",
   "theme.cool": "Cool",
+  "theme.random": "Random",
 };
 
 const ja: Record<string, string> = {
@@ -94,6 +100,7 @@ const ja: Record<string, string> = {
   "site.description": "AI技術、ツール実測、学習ノートをシェアする個人ブログ。最も軽い方法で最もハードな技術を語る。",
   "nav.home": "ホーム",
   "nav.about": "について",
+  "nav.github": "GitHub リポジトリ",
   "nav.menu": "メニューを開く",
   "hero.eyebrow": "✦ AI · 技術 · ノート",
   "hero.cta1": "記事を見る →",
@@ -106,6 +113,7 @@ const ja: Record<string, string> = {
   "index.all": "すべて",
   "index.tag": "タグ",
   "index.noResult": "一致する記事がありません。別のキーワードをお試しください〜",
+  "index.more": "もっと見る →",
   "toc.title": "目次",
   "post.back": "← ホームに戻る",
   "about.h2": "このブログについて",
@@ -121,6 +129,7 @@ const ja: Record<string, string> = {
   "theme.cute": "かわいい",
   "theme.pretty": "エレガント",
   "theme.cool": "クール",
+  "theme.random": "ランダム",
 };
 
 export const t: Record<string, Record<string, string>> = { zh, en, ja };

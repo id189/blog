@@ -270,6 +270,20 @@ img { max-width: 100%; display: block; }
 .ctrl-btn:hover { color: var(--violet); border-color: var(--violet); }
 .ctrl-btn .caret { font-size: 0.7rem; opacity: 0.7; }
 
+/* 导航栏 GitHub 链接（图标按钮，融入现有控件风格） */
+.nav-github {
+  display: inline-grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-soft);
+  transition: all 0.2s;
+}
+.nav-github:hover { color: var(--violet); border-color: var(--violet); transform: translateY(-2px); }
+.nav-github svg { width: 18px; height: 18px; fill: currentColor; }
+
 /* 语言下拉 */
 .lang-switch { position: relative; }
 .lang-menu {
@@ -289,19 +303,25 @@ img { max-width: 100%; display: block; }
 .lang-opt.active { color: var(--violet); background: var(--violet-tint); font-weight: 700; }
 .lang-opt .flag { font-size: 1rem; }
 
-/* 主题切换 */
-.theme-switch { display: inline-flex; align-items: center; gap: 4px; }
-.theme-btn {
-  width: 30px; height: 30px; display: inline-grid; place-items: center;
-  font-size: 0.95rem; line-height: 1;
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--r-pill); color: var(--ink-soft); cursor: pointer;
-  transition: all 0.2s; padding: 0;
+/* 主题下拉（与语言下拉保持一致） */
+.theme-switch { position: relative; }
+.theme-btn { font-family: var(--font-display); font-weight: 600; font-size: 0.85rem; }
+.theme-menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 60;
+  min-width: 140px; display: none; flex-direction: column; gap: 2px;
+  background: var(--surface-solid); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: 6px; box-shadow: var(--glow-soft);
 }
-.theme-btn:hover { transform: translateY(-2px); border-color: var(--violet); color: var(--violet); }
-.theme-btn.active {
-  background: var(--grad); border-color: transparent; color: #fff; box-shadow: var(--glow-soft);
+.theme-menu.open { display: flex; }
+.theme-opt {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  font-family: var(--font-body); font-size: 0.88rem; color: var(--ink-soft);
+  background: transparent; border: none; border-radius: var(--r-sm);
+  padding: 8px 10px; cursor: pointer; text-align: left; transition: all 0.18s;
 }
+.theme-opt:hover { color: var(--violet); background: var(--violet-tint); }
+.theme-opt.active { color: var(--violet); background: var(--violet-tint); font-weight: 700; }
+.theme-opt .ico { font-size: 1rem; width: 1.2em; text-align: center; }
 
 /* ── Hero ── */
 .hero { padding: 92px 0 56px; text-align: center; position: relative; }
@@ -510,6 +530,28 @@ img { max-width: 100%; display: block; }
   margin: 0;
   flex: 1;
 }
+
+/* 懒加载：更多文章 */
+.load-sentinel {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 1px;
+}
+.more-btn {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--violet);
+  background: var(--surface);
+  border: 1px solid var(--violet);
+  border-radius: var(--r-pill);
+  padding: 10px 26px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.more-btn:hover { background: var(--violet); color: #fff; box-shadow: var(--glow-soft); }
 
 /* ── 标签胶囊 ── */
 .tags { display: flex; gap: 8px; flex-wrap: wrap; }

@@ -3,8 +3,14 @@ import { LANGS, DEFAULT_LANG, LANG_LOCALE, t } from "../i18n/ui";
 
 const THEME_KEY = "theme";
 const LANG_KEY = "lang";
-const DEFAULT_THEME = "neon";
+const DEFAULT_THEME = "cute";
 const THEMES = ["neon", "cute", "pretty", "cool"];
+const THEME_ICONS: Record<string, string> = {
+  neon: "◆",
+  cute: "🌸",
+  pretty: "💐",
+  cool: "🌌",
+};
 
 function dictFor(lang: string) {
   return t[lang] || t[DEFAULT_LANG];
@@ -85,15 +91,37 @@ export function applyLang(lang: string) {
   document.querySelectorAll<HTMLElement>(".lang-opt").forEach((el) => {
     el.classList.toggle("active", el.dataset.lang === lang);
   });
+  updateThemeTrigger();
 }
 
 export function applyTheme(name: string) {
+  // 随机：在上次主题之外挑一个，避免连续两次相同
+  if (name === "random") {
+    const last = document.documentElement.dataset.theme || DEFAULT_THEME;
+    const pool = THEMES.filter((x) => x !== last);
+    name = pool[Math.floor(Math.random() * pool.length)] || THEMES[0];
+  }
   if (!THEMES.includes(name)) name = DEFAULT_THEME;
   document.documentElement.dataset.theme = name;
   localStorage.setItem(THEME_KEY, name);
-  document.querySelectorAll<HTMLElement>(".theme-btn").forEach((el) => {
+  updateThemeTrigger();
+  document.querySelectorAll<HTMLElement>(".theme-opt").forEach((el) => {
     el.classList.toggle("active", el.dataset.theme === name);
   });
+}
+
+// 根据当前主题更新导航栏“风格”下拉触发按钮的图标+文案（随语言切换而刷新）
+function updateThemeTrigger() {
+  const theme = document.documentElement.dataset.theme || DEFAULT_THEME;
+  const lang = (window as any).__currentLang || DEFAULT_LANG;
+  const dict = dictFor(lang);
+  const btn = document.getElementById("themeBtn");
+  const cur = btn?.querySelector(".theme-cur");
+  if (cur) {
+    const icon = THEME_ICONS[theme] ?? "◆";
+    const label = dict["theme." + theme] || theme;
+    cur.textContent = `${icon} ${label}`;
+  }
 }
 
 // 供 index.astro 内联脚本调用的计数格式化
@@ -121,11 +149,26 @@ function init() {
       langMenu?.classList.remove("open");
     });
   });
-  document.addEventListener("click", () => langMenu?.classList.remove("open"));
+  document.addEventListener("click", () => {
+    langMenu?.classList.remove("open");
+    themeMenu?.classList.remove("open");
+    themeBtn?.setAttribute("aria-expanded", "false");
+  });
 
-  // 主题按钮
-  document.querySelectorAll<HTMLElement>(".theme-btn").forEach((el) => {
-    el.addEventListener("click", () => applyTheme(el.dataset.theme || DEFAULT_THEME));
+  // 主题下拉
+  const themeBtn = document.getElementById("themeBtn");
+  const themeMenu = document.getElementById("themeMenu");
+  themeBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const open = themeMenu?.classList.toggle("open");
+    themeBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  document.querySelectorAll<HTMLElement>(".theme-opt").forEach((el) => {
+    el.addEventListener("click", () => {
+      applyTheme(el.dataset.theme || DEFAULT_THEME);
+      themeMenu?.classList.remove("open");
+      themeBtn?.setAttribute("aria-expanded", "false");
+    });
   });
 }
 
