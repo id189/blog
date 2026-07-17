@@ -534,6 +534,48 @@ img { max-width: 100%; display: block; }
 
 ::selection { background: rgba(139, 92, 246, 0.25); color: var(--ink); }
 
+/* ── 多级分类树 ── */
+.cat-tree { margin-top: 8px; max-height: 340px; overflow-y: auto; }
+.cat-node { position: relative; }
+.cat-node .toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px; flex: 0 0 18px;
+  font-size: 0.7rem; line-height: 1;
+  color: var(--ink-faint); cursor: pointer; user-select: none;
+  transition: transform 0.15s; margin-right: 2px;
+}
+.cat-node .toggle:hover { color: var(--violet); }
+.cat-node .cat-label {
+  flex: 1; display: flex; align-items: center; justify-content: space-between;
+  width: 100%; font-family: var(--font-body); font-size: 0.92rem; color: var(--ink-soft);
+  background: transparent; border: 1px solid transparent; border-radius: var(--r-sm);
+  padding: 8px 10px; margin: 2px 0; cursor: pointer; text-align: left; transition: all 0.2s;
+}
+.cat-node .cat-label:hover { color: var(--violet); background: rgba(139, 92, 246, 0.08); }
+.cat-node .cat-label.selected {
+  color: #fff; background: var(--grad); border-color: transparent; box-shadow: var(--glow-soft);
+}
+.cat-node .cat-label.selected .count { background: rgba(255, 255, 255, 0.25); color: #fff; }
+.cat-node .cat-label.selected .name { color: #fff; }
+
+/* ── 标签云 ── */
+.tag-cloud-card { padding: 18px 20px; margin-top: 16px; }
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.tag-chip {
+  font-family: var(--font-display); font-weight: 700; line-height: 1;
+  padding: 5px 12px; border-radius: var(--r-pill);
+  border: 1px solid var(--line); background: rgba(59, 130, 246, 0.10); color: var(--blue);
+  cursor: pointer; transition: all 0.18s;
+}
+.tag-chip:hover { border-color: var(--violet); color: var(--violet); }
+.tag-chip.active {
+  background: var(--grad); border-color: transparent; color: #fff; box-shadow: var(--glow-soft);
+}
+.tag-chip.active .count { background: rgba(255, 255, 255, 0.25); color: #fff; }
+.tag-chip .count { font-size: 0.72rem; opacity: 0.7; margin-left: 4px; }
+
 /* ── 响应式 ── */
 @media (max-width: 1023px) {
   .home-layout { grid-template-columns: 1fr; }

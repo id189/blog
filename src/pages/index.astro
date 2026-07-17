@@ -8,13 +8,16 @@ const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
 
-// 统计分类及篇数
-const counts = new Map<string, number>();
+// 标签词频（用于右侧标签云；保留原始大小写用于展示，筛选时统一转小写匹配）
+const tagFreq = new Map<string, number>();
 for (const p of posts) {
-  const c = p.data.category || "未分类";
-  counts.set(c, (counts.get(c) ?? 0) + 1);
+  for (const t of (p.data.tags || [])) {
+    tagFreq.set(t, (tagFreq.get(t) ?? 0) + 1);
+  }
 }
-const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+const topTags = [...tagFreq.entries()]
+  .sort((a, b) => b[1] - a[1])
+  .map(([tag, count]) => ({ tag, count }));
 ---
 
 <Base title="">
@@ -45,14 +48,13 @@ const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
 
           <div class="card cat-list">
             <h4>分类</h4>
-            <button type="button" class="cat-item active" data-cat="">全部 <span class="count">{posts.length}</span></button>
-            {
-              categories.map(([c, n]) => (
-                <button type="button" class="cat-item" data-cat={c.toLowerCase()}>
-                  {c} <span class="count">{n}</span>
-                </button>
-              ))
-            }
+            <button type="button" class="cat-item active" id="catAll" data-cat-path="">全部 <span class="count">{posts.length}</span></button>
+            <div class="cat-tree" id="catTree"></div>
+          </div>
+
+          <div class="card tag-cloud-card">
+            <h4>标签</h4>
+            <div class="tag-cloud" id="tagCloud"></div>
           </div>
         </aside>
       </div>
@@ -62,35 +64,37 @@ const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   </section>
 </Base>
 
-<script>
-  const grid = document.querySelector<HTMLElement>(".posts-grid");
-  const cards = Array.from(document.querySelectorAll<HTMLElement>(".post-card"));
-  const searchInput = document.querySelector<HTMLInputElement>("#siteSearch");
-  const catItems = Array.from(document.querySelectorAll<HTMLElement>(".cat-item"));
-  const resultCount = document.querySelector<HTMLElement>("#resultCount");
-  const noResult = document.querySelector<HTMLElement>("#noResult");
+<script define:vars={{ topTags }}>
+  const grid = document.querySelector(".posts-grid");
+  const cards = Array.from(document.querySelectorAll(".post-card"));
+  const searchInput = document.querySelector("#siteSearch");
+  const catAllBtn = document.getElementById("catAll");
+  const catTree = document.getElementById("catTree");
+  const tagCloud = document.getElementById("tagCloud");
+  const resultCount = document.querySelector("#resultCount");
+  const noResult = document.querySelector("#noResult");
   if (!grid || !searchInput || !resultCount || !noResult) {
     // 元素不存在时直接退出（非首页）
   } else {
-    let activeCat: string | null = null;
+    const BASE = import.meta.env.BASE_URL;
+    let activeCatPath: string | null = null;   // null = 全部
     let matchedSlugs: Set<string> | null = null; // null = 未搜索（全部匹配）
     let pf: any = null;
     let pfReady = false;
+    const selectedTags = new Set<string>();
+    const catLoaded = new Map<string, any[]>();
 
-    // 尝试加载 Pagefind（仅构建产物中存在；dev 下失败则降级）
-    // 用 import.meta.env.BASE_URL 拼接，兼容 GitHub Pages 子路径(/blog/)部署
-    // dev 模式(astro dev)不会生成 dist/pagefind 索引，直接跳过加载以避免 404，
-    // 此时搜索自动降级为基于 data-* 属性的纯文本匹配。
+    // 尝试加载 Pagefind（仅构建产物中存在；dev 下失败则降级为 data-* 文本匹配）
     (async () => {
       if (!import.meta.env.PROD) {
         pfReady = false;
         return;
       }
       try {
-        const pfUrl = `${import.meta.env.BASE_URL}pagefind/pagefind.js`;
+        const pfUrl = `${BASE}pagefind/pagefind.js`;
         pf = await import(/* @vite-ignore */ pfUrl);
         if (pf && typeof pf.init === "function") {
-          await pf.init({ basePath: `${import.meta.env.BASE_URL}pagefind/` });
+          await pf.init({ basePath: `${BASE}pagefind/` });
         }
         pfReady = true;
       } catch {
@@ -100,14 +104,20 @@ const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
 
     const normUrl = (u: string) => u.replace(/\/index\.html$/, "").replace(/\/+$/, "");
 
+    // 三条件 AND：选中分类子树 ∩ 选中标签 ∩ 搜索命中
     function applyFilter() {
       let visible = 0;
       for (const card of cards) {
-        const cat = card.dataset.category ?? "";
+        const postCat = card.dataset.category ?? "";
         const slug = card.dataset.slug ?? "";
-        const catOk = activeCat === null || cat === activeCat;
+        const cardTags = new Set((card.dataset.tags ?? "").split(" ").filter(Boolean));
+        const catOk =
+          activeCatPath === null ||
+          postCat === activeCatPath ||
+          postCat.startsWith(activeCatPath + "/");
+        const tagsOk = selectedTags.size === 0 || [...selectedTags].every((t) => cardTags.has(t));
         const searchOk = matchedSlugs === null || matchedSlugs.has(slug);
-        const show = catOk && searchOk;
+        const show = catOk && tagsOk && searchOk;
         card.style.display = show ? "" : "none";
         if (show) visible++;
       }
@@ -115,18 +125,104 @@ const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
       noResult.hidden = visible !== 0;
     }
 
-    // 分类点击
-    catItems.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        catItems.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        const c = btn.dataset.cat ?? "";
-        activeCat = c === "" ? null : c;
+    // ── 分类树（懒加载：初次仅请求顶级，展开时再 fetch 子级）──
+    async function loadChildren(id: string): Promise<any[]> {
+      if (catLoaded.has(id)) return catLoaded.get(id)!;
+      const res = await fetch(`${BASE}api/categories/${id}.json`);
+      const data = await res.json();
+      const children = data.children || [];
+      catLoaded.set(id, children);
+      return children;
+    }
+
+    function makeNode(child: any, depth: number): HTMLElement {
+      const row = document.createElement("div");
+      row.className = "cat-node";
+
+      const toggle = document.createElement("span");
+      toggle.className = "toggle";
+      toggle.textContent = child.hasChildren ? "▸" : "";
+      toggle.style.visibility = child.hasChildren ? "visible" : "hidden";
+
+      const label = document.createElement("button");
+      label.type = "button";
+      label.className = "cat-label";
+      label.dataset.catPath = child.path;
+      label.innerHTML = `<span class="name">${child.name}</span><span class="count">${child.postCount}</span>`;
+      label.addEventListener("click", () => {
+        document.querySelectorAll(".cat-label.selected").forEach((el) => el.classList.remove("selected"));
+        label.classList.add("selected");
+        catAllBtn?.classList.remove("active");
+        activeCatPath = child.path === "" ? null : child.path;
         applyFilter();
       });
+
+      if (child.hasChildren) {
+        let expanded = false;
+        const box = document.createElement("div");
+        box.className = "cat-children";
+        box.hidden = true;
+        toggle.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!expanded) {
+            toggle.textContent = "▾";
+            if (!box.childElementCount) {
+              const kids = await loadChildren(child.id);
+              kids.forEach((k) => box.appendChild(makeNode(k, depth + 1)));
+            }
+            box.hidden = false;
+          } else {
+            toggle.textContent = "▸";
+            box.hidden = true;
+          }
+          expanded = !expanded;
+        });
+        row.append(toggle, label, box);
+      } else {
+        row.append(toggle, label);
+      }
+      return row;
+    }
+
+    if (catTree) {
+      loadChildren("root").then((children) => {
+        children.forEach((c) => catTree!.appendChild(makeNode(c, 0)));
+      });
+    }
+
+    catAllBtn?.addEventListener("click", () => {
+      activeCatPath = null;
+      document.querySelectorAll(".cat-label.selected").forEach((el) => el.classList.remove("selected"));
+      catAllBtn.classList.add("active");
+      applyFilter();
     });
 
-    // 搜索（防抖）
+    // ── 标签云（多选，与分类/搜索取交集）──
+    if (tagCloud && Array.isArray(topTags)) {
+      const max = Math.max(1, ...(topTags as any[]).map((t: any) => t.count));
+      (topTags as any[]).forEach(({ tag, count }: any) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "tag-chip";
+        btn.dataset.tag = tag.toLowerCase();
+        btn.style.fontSize = `${0.78 + 0.34 * (count / max)}rem`;
+        btn.innerHTML = `${tag} <span class="count">${count}</span>`;
+        btn.addEventListener("click", () => {
+          const key = tag.toLowerCase();
+          if (selectedTags.has(key)) {
+            selectedTags.delete(key);
+            btn.classList.remove("active");
+          } else {
+            selectedTags.add(key);
+            btn.classList.add("active");
+          }
+          applyFilter();
+        });
+        tagCloud.appendChild(btn);
+      });
+    }
+
+    // ── 搜索（防抖）──
     let timer: number | undefined;
     searchInput.addEventListener("input", () => {
       const term = searchInput.value.trim().toLowerCase();
