@@ -466,7 +466,7 @@ img { max-width: 100%; display: block; }
   color: inherit;
 }
 .post-card .cover {
-  height: 160px;
+  height: 200px;
   background: var(--grad);
   display: grid;
   place-items: center;
@@ -490,8 +490,26 @@ img { max-width: 100%; display: block; }
   color: var(--ink-faint);
   font-size: 0.82rem;
 }
-.post-card h3 { font-size: 1.25rem; margin: 0; }
-.post-card .excerpt { color: var(--ink-soft); font-size: 0.95rem; margin: 0; flex: 1; }
+.post-card h3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 1.25rem;
+  margin: 0;
+}
+.post-card .excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin: 0;
+  flex: 1;
+}
 
 /* ── 标签胶囊 ── */
 .tags { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -685,6 +703,7 @@ img { max-width: 100%; display: block; }
   .section { padding: 40px 0; }
   .hero { padding: 64px 0 40px; }
   .posts-grid { grid-template-columns: 1fr; }
+  .post-card .cover { height: 180px; }
 
   .nav-toggle { display: inline-flex; }
   .nav-right {
