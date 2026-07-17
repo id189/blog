@@ -64,7 +64,7 @@ const topTags = [...tagFreq.entries()]
   </section>
 </Base>
 
-<script define:vars={{ topTags }}>
+<script define:vars={{ topTags, BASE: import.meta.env.BASE_URL, IS_PROD: import.meta.env.PROD }}>
   const grid = document.querySelector(".posts-grid");
   const cards = Array.from(document.querySelectorAll(".post-card"));
   const searchInput = document.querySelector("#siteSearch");
@@ -76,17 +76,16 @@ const topTags = [...tagFreq.entries()]
   if (!grid || !searchInput || !resultCount || !noResult) {
     // 元素不存在时直接退出（非首页）
   } else {
-    const BASE = import.meta.env.BASE_URL;
-    let activeCatPath: string | null = null;   // null = 全部
-    let matchedSlugs: Set<string> | null = null; // null = 未搜索（全部匹配）
-    let pf: any = null;
+    let activeCatPath = null;   // null = 全部
+    let matchedSlugs = null;    // null = 未搜索（全部匹配）
+    let pf = null;
     let pfReady = false;
-    const selectedTags = new Set<string>();
-    const catLoaded = new Map<string, any[]>();
+    const selectedTags = new Set();
+    const catLoaded = new Map();
 
     // 尝试加载 Pagefind（仅构建产物中存在；dev 下失败则降级为 data-* 文本匹配）
     (async () => {
-      if (!import.meta.env.PROD) {
+      if (!IS_PROD) {
         pfReady = false;
         return;
       }
@@ -102,7 +101,7 @@ const topTags = [...tagFreq.entries()]
       }
     })();
 
-    const normUrl = (u: string) => u.replace(/\/index\.html$/, "").replace(/\/+$/, "");
+    const normUrl = (u) => u.replace(/\/index\.html$/, "").replace(/\/+$/, "");
 
     // 三条件 AND：选中分类子树 ∩ 选中标签 ∩ 搜索命中
     function applyFilter() {
@@ -126,8 +125,8 @@ const topTags = [...tagFreq.entries()]
     }
 
     // ── 分类树（懒加载：初次仅请求顶级，展开时再 fetch 子级）──
-    async function loadChildren(id: string): Promise<any[]> {
-      if (catLoaded.has(id)) return catLoaded.get(id)!;
+    async function loadChildren(id) {
+      if (catLoaded.has(id)) return catLoaded.get(id);
       const res = await fetch(`${BASE}api/categories/${id}.json`);
       const data = await res.json();
       const children = data.children || [];
@@ -135,7 +134,7 @@ const topTags = [...tagFreq.entries()]
       return children;
     }
 
-    function makeNode(child: any, depth: number): HTMLElement {
+    function makeNode(child, depth) {
       const row = document.createElement("div");
       row.className = "cat-node";
 
@@ -185,9 +184,13 @@ const topTags = [...tagFreq.entries()]
     }
 
     if (catTree) {
-      loadChildren("root").then((children) => {
-        children.forEach((c) => catTree!.appendChild(makeNode(c, 0)));
-      });
+      loadChildren("root")
+        .then((children) => {
+          children.forEach((c) => catTree.appendChild(makeNode(c, 0)));
+        })
+        .catch((err) => {
+          console.error("[cat-tree] 加载失败:", err);
+        });
     }
 
     catAllBtn?.addEventListener("click", () => {
@@ -199,8 +202,8 @@ const topTags = [...tagFreq.entries()]
 
     // ── 标签云（多选，与分类/搜索取交集）──
     if (tagCloud && Array.isArray(topTags)) {
-      const max = Math.max(1, ...(topTags as any[]).map((t: any) => t.count));
-      (topTags as any[]).forEach(({ tag, count }: any) => {
+      const max = Math.max(1, ...topTags.map((t) => t.count));
+      topTags.forEach(({ tag, count }) => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "tag-chip";
@@ -223,7 +226,7 @@ const topTags = [...tagFreq.entries()]
     }
 
     // ── 搜索（防抖）──
-    let timer: number | undefined;
+    let timer;
     searchInput.addEventListener("input", () => {
       const term = searchInput.value.trim().toLowerCase();
       window.clearTimeout(timer);
@@ -237,9 +240,9 @@ const topTags = [...tagFreq.entries()]
           try {
             const res = await pf.search(term);
             const top = res.results.slice(0, 50);
-            const data = await Promise.all(top.map((r: any) => r.data()));
+            const data = await Promise.all(top.map((r) => r.data()));
             matchedSlugs = new Set(
-              data.map((d: any) => {
+              data.map((d) => {
                 const slug = normUrl(d.url).split("/").filter(Boolean).pop() ?? "";
                 return slug;
               })
